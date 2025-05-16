@@ -31,7 +31,7 @@ const DeviceManagement = () => {
 
   const handleRegister = async () => {
     if (!deviceId || !deviceName) {
-      Alert.alert("Please enter both Device ID and Name");
+      Alert.alert("IMEI Found Please Enter Device Name");
       return;
     }
 
