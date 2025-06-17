@@ -10,6 +10,7 @@ const API_AUTH_URL = `${API_BASE_URL}/auth`;
 //device manipulation endpoint
 const API_DEV_URL = `${API_BASE_URL}/dev`;
 
+//authentication api instance
 export const authApi = axios.create({
     baseURL: API_AUTH_URL,
     headers: {
@@ -17,6 +18,7 @@ export const authApi = axios.create({
     }
 });
 
+//device management api instance
 const device_api = axios.create({
     baseURL: API_DEV_URL,
     headers: {

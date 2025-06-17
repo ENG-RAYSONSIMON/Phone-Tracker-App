@@ -1,21 +1,21 @@
 const userIsAuthenticatedMiddleware = require('../middlewares/authMiddleware');
 const deviceController = require('../controllers/deviceController');
 const express = require("express");
-const router = express.Router();
+const deviceRouter = express.Router();
 
-router.post('/reg',
+deviceRouter.post('/reg',
     userIsAuthenticatedMiddleware,
     deviceController.registerDevice
 );
 
-router.get('/all/:ownerId',
+deviceRouter.get('/all/:ownerId',
     userIsAuthenticatedMiddleware,
     deviceController.getDevicesByOwner
 )
 
-router.delete('/del/:id',
+deviceRouter.delete('/del/:id',
     userIsAuthenticatedMiddleware,
     deviceController.deleteDevice
 )
 
-module.exports = router;
+module.exports = deviceRouter;

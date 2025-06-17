@@ -7,11 +7,11 @@ exports.registerDevice = async (req, res) => {
         const owner = req.user._id;
         const location = [];
 
-        // const deviceExist = await Device.findOne({ deviceId: deviceId });
+        const deviceExist = await Device.findOne({ deviceId: deviceId });
 
-        // if (deviceExist) {
-        //     return res.status(400).json({ msg: 'device alredy exist!' });
-        // }
+        if (deviceExist) {
+            return res.status(400).json({ msg: 'device alredy exist!' });
+        }
 
         const device = await Device.create({ deviceId, name, owner, location });
 

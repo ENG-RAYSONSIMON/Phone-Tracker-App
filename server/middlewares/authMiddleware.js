@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');
-const User = require('../models/users');
 require('dotenv').config();
+const User = require('../models/users');
 
 const userIsAuthenticatedMiddleware = async (req, res, next) => {
     const token = req.headers['authorization']?.split(" ")[1];

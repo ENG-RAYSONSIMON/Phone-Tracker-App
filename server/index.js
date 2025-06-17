@@ -32,10 +32,10 @@ const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 
 //API ENDPOINTS
-app.use("/api/v1/track/auth", authRoutes);
-app.use("/api/v1/track/dev", deviceRoutes);
+app.use("/api/track/auth", authRoutes);
+app.use("/api/track/dev", deviceRoutes);
 
-//websocket communication
+//*******************************websocket communication**********************************
 io.on("connection", (socket) => {
   console.log("Client connected: ", socket.id);
 
@@ -53,7 +53,9 @@ io.on("connection", (socket) => {
   });
 });
 
+//**********************************************************************************************
 
+// Start the server
 server.listen(process.env.PORT, () => {
   console.log("Server is up!");
   database.connectToDb();

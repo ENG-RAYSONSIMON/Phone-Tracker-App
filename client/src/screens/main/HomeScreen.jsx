@@ -42,7 +42,9 @@ const HomeScreen = ({ navigation }) => {
       </Card>
 
       <View style={styles.footer}>
+
         <FontAwesome name="shield" size={35} color="#6200ee" />
+        
         <Text style={[styles.footerText, { color: "#6200ee" }]}>
           Stay Secure, Stay Connected
         </Text>

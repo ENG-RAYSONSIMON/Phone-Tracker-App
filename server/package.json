@@ -6,11 +6,8 @@
   "scripts": {
     "start": "nodemon index.js"
   },
- 
   "author": "Rayson Simon",
-
   "license": "ISC",
-
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
@@ -19,6 +16,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1",
+    "multer": "^2.0.1",
     "nodemon": "^3.1.9",
     "socket.io": "^4.8.1"
   }

@@ -1,8 +1,9 @@
- const User = require("../models/users");
- const bcrypt = require("bcryptjs");
- const JWT = require("jsonwebtoken");
- require("dotenv").config();
- 
+const bcrypt = require("bcryptjs");
+const JWT = require("jsonwebtoken");
+require("dotenv").config();
+const User = require("../models/users");
+ const { generateAccessToken } = require("../utils/functions");
+
  exports.register = async (req, res) => {
    const { name, email, password } = req.body;
    const user = await User.findOne({ email: email });
@@ -42,9 +43,7 @@
    };
    
    //creating a jwt token
-   const token = JWT.sign(payload, process.env.JWT_SECRET_KEY, {
-     expiresIn: "1d",
-   });
- 
+    const token = generateAccessToken(payload);
+    
    return res.status(200).json({ token: token });
  };

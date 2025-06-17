@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Alert, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  Text,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
 import socket from "../../services/webSocket";
+import useRequestLocationPermission from "../../hooks/useRequestLocationPermission";
+
+const LOCATION_TASK_NAME = "background-location-task";
 
 export default function MapScreen({ navigation, route }) {
   const { device } = route.params;
@@ -11,48 +22,49 @@ export default function MapScreen({ navigation, route }) {
   const [serverLocation, setServerLocation] = useState(null);
 
   useEffect(() => {
-    
-    let locationSubscription = null;
+    const setupLocationTracking = async () => {
+      const requestLocationPermission = useRequestLocationPermission();
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
 
-    const requestAndTrackLocation = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "We need location access to show your position."
-        );
+      const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+      if (!isTaskDefined) {
+        console.warn("Background task not defined.");
         return;
       }
 
-      locationSubscription = await Location.watchPositionAsync(
-        {
+      const hasStarted = await Location.hasStartedLocationUpdatesAsync(
+        LOCATION_TASK_NAME
+      );
+      if (!hasStarted) {
+        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.High,
           timeInterval: 5000,
           distanceInterval: 10,
-        },
-        (loc) => {
-          const coords = {
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          };
-          setLocation(coords);
+          foregroundService: {
+            notificationTitle: "Tracking Location",
+            notificationBody:
+              "We are tracking your location in the background.",
+            notificationColor: "#1e1e1e",
+          },
+          pausesUpdatesAutomatically: false,
+        });
+      }
 
-          socket.emit("location_update", {
-            deviceId: device._id,
-            location: coords,
-          });
-        }
-      );
+      const current = await Location.getCurrentPositionAsync({});
+      const coords = {
+        latitude: current.coords.latitude,
+        longitude: current.coords.longitude,
+      };
+      setLocation(coords);
     };
 
-    requestAndTrackLocation();
+    setupLocationTracking();
 
-    // Handle socket connection events
     socket.on("connect", () => {
       console.log("Connected to server");
     });
 
-    // Listen to location broadcasts from server
     socket.on("location_broadcast", (data) => {
       if (data.deviceId === device._id) {
         console.log("Server location update:", data.location);
@@ -60,10 +72,8 @@ export default function MapScreen({ navigation, route }) {
       }
     });
 
-    // Cleanup on component unmount
     return () => {
       socket.off("connect");
-      socket.off("server_message");
       socket.off("location_broadcast");
     };
   }, []);
@@ -77,7 +87,6 @@ export default function MapScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Top header with back button and title */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.navigate("Drawer")}
@@ -88,7 +97,6 @@ export default function MapScreen({ navigation, route }) {
         <Text style={styles.text}>Current location of {device.name}</Text>
       </View>
 
-      {/* Main map view */}
       <MapView
         style={styles.map}
         region={{
@@ -99,7 +107,6 @@ export default function MapScreen({ navigation, route }) {
         }}
         showsUserLocation={true}
       >
-        {/* Marker for the device location */}
         {currentCoords && (
           <Marker coordinate={currentCoords} title={device.name} />
         )}
@@ -108,10 +115,35 @@ export default function MapScreen({ navigation, route }) {
   );
 }
 
+// 💡 Background task definition OUTSIDE the component
+TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
+  if (error) {
+    console.error("Background location error:", error);
+    return;
+  }
+  if (data) {
+    const { locations } = data;
+    const loc = locations[0];
+
+    if (loc) {
+      const coords = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      };
+
+      // Emit location to server in the background
+      socket.emit("location_update", {
+        deviceId: "your-device-id-or-dynamic-value", // You can use something like route.params or global state here
+        location: coords,
+      });
+
+      console.log("📡 Background location:", coords);
+    }
+  }
+});
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     position: "absolute",
     top: 40,
