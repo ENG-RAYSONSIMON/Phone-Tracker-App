@@ -2,12 +2,17 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: 'client',
+    name: 'Phone Tracker',
     slug: 'slug',
-    // other expo config...
+    android: {
+  
+      package: 'com.engraysonsimon.phonetracker',
+    },
     extra: {
       API_BASE_URL: process.env.API_BASE_URL,
-      SERVER_URL: process.env.SERVER_URL,
+      eas: {
+        projectId: '2b8aa567-8c3d-4ac8-ae4b-3b59cb2d06cc',
+      },
     },
   },
 };
