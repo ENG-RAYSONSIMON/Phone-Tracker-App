@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 // CORS for REST API
 app.use(cors({
-  origin: '*', // Allow Expo Go to access REST endpoints
+  origin: '*', 
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,7 +19,7 @@ app.use(express.json());
 // Socket.IO config
 const io = new Server(server, {
   cors: {
-    origin: '*', // 👈 For dev, allow any mobile IP (later restrict it)
+    origin: '*', // 👈 For dev
     methods: ['GET', 'POST'],
   },
 });
@@ -32,8 +32,8 @@ const authRoutes = require("./routes/authRoutes");
 const deviceRoutes = require("./routes/deviceRoutes");
 
 //API ENDPOINTS
-app.use("/api/track/auth", authRoutes);
-app.use("/api/track/dev", deviceRoutes);
+app.use("/auth", authRoutes);
+app.use("/dev", deviceRoutes);
 
 //*******************************websocket communication**********************************
 io.on("connection", (socket) => {
@@ -54,9 +54,9 @@ io.on("connection", (socket) => {
 });
 
 //**********************************************************************************************
-
+const PORT = process.env.PORT || 5000;
 // Start the server
-server.listen(process.env.PORT, () => {
+server.listen(PORT, () => {
   console.log("Server is up!");
   database.connectToDb();
 });
