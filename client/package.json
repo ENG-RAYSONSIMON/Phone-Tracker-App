@@ -1,10 +1,11 @@
 {
-  "name": "client",
+  "name": "phone-tracking-app",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android"
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -32,7 +33,9 @@
     "react-native-vector-icons": "^10.2.0",
     "socket.io-client": "^4.8.1",
     "expo-linear-gradient": "~14.0.2",
-    "expo-task-manager": "~12.0.6"
+    "expo-task-manager": "~12.0.6",
+    "expo-dev-client": "~5.0.20",
+    "expo-device": "~7.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

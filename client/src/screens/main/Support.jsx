@@ -38,27 +38,7 @@ export default function Support() {
         Check your internet and GPS settings. Keep the app running in the
         background.
       </Text>
-
-      <Text style={styles.sectionTitle}>
-        🚨 4. Wrong PIN Detection & Intruder Photo
-      </Text>
-      <Text style={styles.itemTitle}>• How it works:</Text>
-      <Text style={styles.itemText}>
-        When a wrong PIN is entered, the app takes a picture and sends it to
-        your dashboard.
-      </Text>
-      <Text style={styles.itemTitle}>• Make sure permissions are enabled:</Text>
-      <Text style={styles.itemText}>
-        Camera access must be granted for this to work.
-      </Text>
-
-      <Text style={styles.sectionTitle}>💾 5. Viewing Captured Images</Text>
-      <Text style={styles.itemText}>
-        Go to the Captured Images tab to see pictures of intruders. All data is
-        securely stored and encrypted.
-      </Text>
-
-      <Text style={styles.sectionTitle}>🔒 6. Security</Text>
+      <Text style={styles.sectionTitle}>🔒 4. Security</Text>
       <Text style={styles.itemText}>
         We use JWT tokens and HTTPS for secure communication. All sensitive data
         is encrypted end-to-end.
@@ -66,7 +46,7 @@ export default function Support() {
 
       <Text style={styles.sectionTitle}>📩 Need More Help?</Text>
       <Text style={styles.itemText}>
-        Email us at: support@trackrapp.com
+        Email us at: raysonsimon56@gmail.com
         {"\n"}Or visit: www.trackrapp.com/support
       </Text>
     </ScrollView>

@@ -11,7 +11,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeScreen from "../screens/main/HomeScreen";
 import LiveTracking from "../screens/main/LiveTracking";
 import DeviceManagement from "../screens/main/DeviceManagement";
-import CapturedImages from "../screens/main/CapturedImages";
 import Support from "../screens/main/Support";
 
 // This function retrieves the username from the token data
@@ -58,11 +57,6 @@ const CustomDrawerContent = (props) => {
         icon={() => <Ionicons name="phone-portrait-outline" size={24} />}
       />
       <DrawerItem
-        label="Captured Images"
-        onPress={() => props.navigation.navigate("Captured Images")}
-        icon={() => <Ionicons name="camera-outline" size={24} />}
-      />
-      <DrawerItem
         label="Support & Help"
         onPress={() => props.navigation.navigate("Support & Help")}
         icon={() => <Ionicons name="help-circle-outline" size={24} />}
@@ -87,7 +81,6 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Live Tracking" component={LiveTracking} />
       <Drawer.Screen name="Device Management" component={DeviceManagement} />
-      <Drawer.Screen name="Captured Images" component={CapturedImages} />
       <Drawer.Screen name="Support & Help" component={Support} />
     </Drawer.Navigator>
   );

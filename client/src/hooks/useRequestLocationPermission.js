@@ -4,12 +4,13 @@ import * as Location from "expo-location";
 
 export default function useRequestLocationPermission() {
   const requestPermission = useCallback(async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    const { status: fgStatus } = await Location.requestForegroundPermissionsAsync();
+    const { status: bgStatus } = await Location.requestBackgroundPermissionsAsync();
 
-    if (status !== "granted") {
+    if (fgStatus !== "granted" || bgStatus !== "granted") {
       Alert.alert(
         "Permission Denied",
-        "We need location access to show your position."
+        "We need full location access to track your phone in the background."
       );
       return false;
     }

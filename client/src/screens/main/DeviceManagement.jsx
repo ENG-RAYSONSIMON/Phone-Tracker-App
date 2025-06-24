@@ -7,39 +7,49 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { TextInput, Button, Text, IconButton } from "react-native-paper";
+import * as Device from "expo-device";
+import * as SecureStore from "expo-secure-store";
 import { useDeviceContext } from "../../context/DeviceContext";
-
-// Function to generate a unique device ID
-const generateUniqueId = () => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  return 'XXXX-XXXX-XXXX'.replace(/[X]/g, () =>
-    characters.charAt(Math.floor(Math.random() * characters.length))
-  );
-};
 
 const DeviceManagement = () => {
   const [deviceId, setDeviceId] = useState("");
   const [deviceName, setDeviceName] = useState("");
-
   const { devices, loading, addDevice, removeDevice } = useDeviceContext();
 
-  // Generate device ID automatically when component mounts
+  // Get or generate device ID once when the component mounts
   useEffect(() => {
-    const newId = generateUniqueId();
-    setDeviceId(newId);
+    const fetchDeviceId = async () => {
+      try {
+        let storedId = await SecureStore.getItemAsync("deviceId");
+
+        if (!storedId) {
+          const generatedId =
+            Device.osInternalBuildId ||
+            Math.random().toString(36).substring(2, 15);
+
+          storedId = generatedId;
+          await SecureStore.setItemAsync("deviceId", storedId);
+        }
+
+        setDeviceId(storedId);
+      } catch (error) {
+        console.error("Error getting device ID:", error);
+      }
+    };
+
+    fetchDeviceId();
   }, []);
 
   const handleRegister = async () => {
     if (!deviceId || !deviceName) {
-      Alert.alert("IMEI Found Please Enter Device Name");
+      Alert.alert("Please enter a device name.");
       return;
     }
 
     try {
       await addDevice(deviceId, deviceName);
       Alert.alert("Device registered successfully!");
-      setDeviceId(generateUniqueId()); // generate new ID after registering
-      setDeviceName("");
+      setDeviceName(""); // clear name field, but keep ID
     } catch (error) {
       console.error("Registration error:", error);
       Alert.alert("Error registering device");
@@ -47,14 +57,18 @@ const DeviceManagement = () => {
   };
 
   const handleDelete = (id) => {
-    Alert.alert("Delete Device", "Are you sure you want to delete this device?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => confirmDelete(id),
-      },
-    ]);
+    Alert.alert(
+      "Delete Device",
+      "Are you sure you want to delete this device?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => confirmDelete(id),
+        },
+      ]
+    );
   };
 
   const confirmDelete = async (id) => {
@@ -79,11 +93,12 @@ const DeviceManagement = () => {
       <Text style={styles.header}>Register New Device</Text>
 
       <TextInput
-        label="Device IMEI"
+        label="Device ID"
         value={deviceId}
         style={{ marginBottom: 10 }}
-        editable={false} // Make it read-only
+        editable={false} // Read-only
       />
+
       <TextInput
         label="Device Name"
         value={deviceName}

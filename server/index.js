@@ -37,19 +37,28 @@ app.use("/dev", deviceRoutes);
 
 //*******************************websocket communication**********************************
 io.on("connection", (socket) => {
-  console.log("Client connected: ", socket.id);
+  console.log("Client connected:", socket.id);
 
-  // Real-time location sharing
-  socket.on("location_update", (locationData) => {
-    console.log("Location update from client:", locationData);
+  // Listen for location updates from a client
+  socket.on("location_update", (data) => {
+    const { location, deviceId } = data;
 
-    //Emit to all connected clients
-    io.emit("location_broadcast", locationData);
+    if (!deviceId || !location) {
+      console.warn("⚠️ Invalid location data received:", data);
+      return;
+    }
 
+    console.log(`Location update from device ${deviceId}:`, location);
+
+    // Broadcast the location to all clients
+    io.emit("location_broadcast", {
+      deviceId,
+      location,
+    });
   });
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected: ", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 

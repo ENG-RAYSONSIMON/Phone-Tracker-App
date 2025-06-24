@@ -9,7 +9,6 @@ import LandingScreen from "../screens/auth/LandingScreen";
 import AuthForm from "../screens/auth/AuthForm";
 import DrawerNavigator from "./DrawerNavigator";
 import MapScreen from "../screens/main/MapScreen";
-import LiveTracking from "../screens/main/LiveTracking";
 
 const Stack = createNativeStackNavigator();
 
