@@ -42,12 +42,8 @@ const HomeScreen = ({ navigation }) => {
       </Card>
 
       <View style={styles.footer}>
-
         <FontAwesome name="shield" size={35} color="#6200ee" />
-        
-        <Text style={[styles.footerText, { color: "#6200ee" }]}>
-          Stay Secure, Stay Connected
-        </Text>
+        <Text style={styles.footerText}>Stay Secure, Stay Connected</Text>
       </View>
     </View>
   );
@@ -89,14 +85,17 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
+    flexWrap: "wrap",
+    justifyContent: "center",
     paddingHorizontal: 8,
     paddingBottom: 12,
   },
   primaryButton: {
     borderRadius: 8,
     backgroundColor: "#007bff",
+    minWidth: 140,
+    marginHorizontal: 4,
+    marginTop: 8,
   },
   primaryButtonContent: {
     paddingHorizontal: 12,
@@ -105,6 +104,9 @@ const styles = StyleSheet.create({
   outlinedButton: {
     borderRadius: 8,
     borderColor: "#007bff",
+    minWidth: 140,
+    marginHorizontal: 4,
+    marginTop: 8,
   },
   outlinedButtonContent: {
     paddingHorizontal: 12,
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   footerText: {
     marginTop: 8,
     fontSize: 16,
-    color: "#4CAF50",
     fontWeight: "500",
+    color: "#6200ee",
   },
 });

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Alert } from "react-native";
+import { Alert, Linking } from "react-native";
 import * as Location from "expo-location";
 
 export default function useRequestLocationPermission() {
@@ -7,15 +7,33 @@ export default function useRequestLocationPermission() {
     const { status: fgStatus } = await Location.requestForegroundPermissionsAsync();
     const { status: bgStatus } = await Location.requestBackgroundPermissionsAsync();
 
-    if (fgStatus !== "granted" || bgStatus !== "granted") {
-      Alert.alert(
-        "Permission Denied",
-        "We need full location access to track your phone in the background."
-      );
-      return false;
+    if (fgStatus === "granted" && bgStatus === "granted") {
+      return true;
     }
 
-    return true;
+    if (fgStatus === "denied" || bgStatus === "denied") {
+      Alert.alert(
+        "Location Permission Required",
+        "To track your phone, you need to allow location access in the background.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Open Settings",
+            onPress: () => Linking.openSettings(),
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        "Permission Error",
+        "Unexpected permission status. Please check your settings."
+      );
+    }
+
+    return false;
   }, []);
 
   return requestPermission;

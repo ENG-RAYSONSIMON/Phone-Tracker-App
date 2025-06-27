@@ -18,40 +18,40 @@ export default function MapScreen({ navigation, route }) {
 
   useEffect(() => {
     const setup = async () => {
-      // Save deviceId for background tracking
-      if (device.deviceId) {
-        await SecureStore.setItemAsync("deviceId", device.deviceId);
-      }
+      const myDeviceId = await SecureStore.getItemAsync("myDeviceId");
+      const isSelf = myDeviceId === device.deviceId;
 
+      await SecureStore.setItemAsync("targetDeviceId", device.deviceId);
       defineBackgroundLocationTask();
 
       const requestLocationPermission = useRequestLocationPermission();
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) return;
 
-      const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-        LOCATION_TASK_NAME
-      );
+      if (isSelf) {
+        const hasStarted = await Location.hasStartedLocationUpdatesAsync(
+          LOCATION_TASK_NAME
+        );
+        if (!hasStarted) {
+          await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5000,
+            distanceInterval: 10,
+            foregroundService: {
+              notificationTitle: "Tracking Location",
+              notificationBody: "We are tracking your location in the background.",
+              notificationColor: "#1e1e1e",
+            },
+            pausesUpdatesAutomatically: false,
+          });
+        }
 
-      if (!hasStarted) {
-        await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
-          foregroundService: {
-            notificationTitle: "Tracking Location",
-            notificationBody: "We are tracking your location in the background.",
-            notificationColor: "#1e1e1e",
-          },
-          pausesUpdatesAutomatically: false,
+        const current = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: current.coords.latitude,
+          longitude: current.coords.longitude,
         });
       }
-
-      const current = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: current.coords.latitude,
-        longitude: current.coords.longitude,
-      });
     };
 
     setup();
@@ -121,15 +121,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  backButton: {
-    marginRight: 10,
-  },
-  text: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  map: {
-    flex: 1,
-  },
+  backButton: { marginRight: 10 },
+  text: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  map: { flex: 1 },
 });

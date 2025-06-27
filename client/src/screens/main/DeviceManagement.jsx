@@ -12,63 +12,49 @@ import * as SecureStore from "expo-secure-store";
 import { useDeviceContext } from "../../context/DeviceContext";
 
 const DeviceManagement = () => {
-  const [deviceId, setDeviceId] = useState("");
+  const [myDeviceId, setMyDeviceId] = useState("");
   const [deviceName, setDeviceName] = useState("");
   const { devices, loading, addDevice, removeDevice } = useDeviceContext();
 
-  // Get or generate device ID once when the component mounts
   useEffect(() => {
-    const fetchDeviceId = async () => {
-      try {
-        let storedId = await SecureStore.getItemAsync("deviceId");
-
-        if (!storedId) {
-          const generatedId =
-            Device.osInternalBuildId ||
-            Math.random().toString(36).substring(2, 15);
-
-          storedId = generatedId;
-          await SecureStore.setItemAsync("deviceId", storedId);
-        }
-
-        setDeviceId(storedId);
-      } catch (error) {
-        console.error("Error getting device ID:", error);
+    const getOrGenerateDeviceId = async () => {
+      let storedId = await SecureStore.getItemAsync("myDeviceId");
+      if (!storedId) {
+        storedId =
+          Device.osInternalBuildId ||
+          Math.random().toString(36).substring(2, 15);
+        await SecureStore.setItemAsync("myDeviceId", storedId);
       }
+      setMyDeviceId(storedId);
     };
 
-    fetchDeviceId();
+    getOrGenerateDeviceId();
   }, []);
 
   const handleRegister = async () => {
-    if (!deviceId || !deviceName) {
+    if (!deviceName || !myDeviceId) {
       Alert.alert("Please enter a device name.");
       return;
     }
 
     try {
-      await addDevice(deviceId, deviceName);
+      await addDevice(myDeviceId, deviceName);
       Alert.alert("Device registered successfully!");
-      setDeviceName(""); // clear name field, but keep ID
+      setDeviceName("");
     } catch (error) {
-      console.error("Registration error:", error);
-      Alert.alert("Error registering device");
+      Alert.alert("Error: Device already registered or network issue.");
     }
   };
 
   const handleDelete = (id) => {
-    Alert.alert(
-      "Delete Device",
-      "Are you sure you want to delete this device?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => confirmDelete(id),
-        },
-      ]
-    );
+    Alert.alert("Delete Device", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => confirmDelete(id),
+      },
+    ]);
   };
 
   const confirmDelete = async (id) => {
@@ -94,9 +80,9 @@ const DeviceManagement = () => {
 
       <TextInput
         label="Device ID"
-        value={deviceId}
+        value={myDeviceId}
         style={{ marginBottom: 10 }}
-        editable={false} // Read-only
+        editable={false}
       />
 
       <TextInput
@@ -106,12 +92,7 @@ const DeviceManagement = () => {
         style={{ marginBottom: 20 }}
       />
 
-      <Button
-        mode="contained"
-        onPress={handleRegister}
-        loading={loading}
-        disabled={loading}
-      >
+      <Button mode="contained" onPress={handleRegister} loading={loading}>
         Register Device
       </Button>
 
@@ -130,16 +111,8 @@ const DeviceManagement = () => {
 };
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  subHeader: {
-    marginTop: 30,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  subHeader: { marginTop: 30, fontSize: 18, fontWeight: "bold" },
   card: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -149,14 +122,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
-  deviceName: {
-    fontSize: 16,
-  },
-  emptyText: {
-    marginTop: 20,
-    textAlign: "center",
-    color: "#888",
-  },
+  deviceName: { fontSize: 16 },
+  emptyText: { marginTop: 20, textAlign: "center", color: "#888" },
 });
 
 export default DeviceManagement;
