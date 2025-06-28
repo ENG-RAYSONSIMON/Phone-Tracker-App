@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MapView, { Marker } from "react-native-maps";
@@ -15,11 +15,13 @@ export default function MapScreen({ navigation, route }) {
   const { device } = route.params;
   const [location, setLocation] = useState(null);
   const [serverLocation, setServerLocation] = useState(null);
+  const [myDeviceId, setMyDeviceId] = useState(null);
+  const mapRef = useRef(null);
 
   useEffect(() => {
     const setup = async () => {
-      const myDeviceId = await SecureStore.getItemAsync("myDeviceId");
-      const isSelf = myDeviceId === device.deviceId;
+      const storedId = await SecureStore.getItemAsync("myDeviceId");
+      setMyDeviceId(storedId);
 
       await SecureStore.setItemAsync("targetDeviceId", device.deviceId);
       defineBackgroundLocationTask();
@@ -27,6 +29,8 @@ export default function MapScreen({ navigation, route }) {
       const requestLocationPermission = useRequestLocationPermission();
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) return;
+
+      const isSelf = storedId === device.deviceId;
 
       if (isSelf) {
         const hasStarted = await Location.hasStartedLocationUpdatesAsync(
@@ -47,10 +51,18 @@ export default function MapScreen({ navigation, route }) {
         }
 
         const current = await Location.getCurrentPositionAsync({});
-        setLocation({
+        const coords = {
           latitude: current.coords.latitude,
           longitude: current.coords.longitude,
-        });
+        };
+        setLocation(coords);
+
+        // Animate to current location
+        mapRef.current?.animateToRegion({
+          ...coords,
+          latitudeDelta: 0.004,
+          longitudeDelta: 0.004,
+        }, 1000);
       }
     };
 
@@ -64,6 +76,13 @@ export default function MapScreen({ navigation, route }) {
       if (data.deviceId === device.deviceId) {
         console.log("📡 Received location from server:", data.location);
         setServerLocation(data.location);
+
+        // Animate to received location
+        mapRef.current?.animateToRegion({
+          ...data.location,
+          latitudeDelta: 0.004,
+          longitudeDelta: 0.004,
+        }, 1000);
       }
     });
 
@@ -73,8 +92,16 @@ export default function MapScreen({ navigation, route }) {
     };
   }, [device]);
 
-  const currentCoords = serverLocation || location;
   const fallbackCoords = { latitude: -6.8086855, longitude: 39.219476 };
+
+  const initialRegion = {
+    latitude: fallbackCoords.latitude,
+    longitude: fallbackCoords.longitude,
+    latitudeDelta: 0.004,
+    longitudeDelta: 0.004,
+  };
+
+  const markerCoords = serverLocation || location;
 
   return (
     <View style={styles.container}>
@@ -89,18 +116,14 @@ export default function MapScreen({ navigation, route }) {
       </View>
 
       <MapView
+        ref={mapRef}
         style={styles.map}
-        region={{
-          latitude: currentCoords?.latitude || fallbackCoords.latitude,
-          longitude: currentCoords?.longitude || fallbackCoords.longitude,
-          latitudeDelta: 0.004,
-          longitudeDelta: 0.004,
-        }}
+        initialRegion={initialRegion}
         showsUserLocation
         showsMyLocationButton
       >
-        {currentCoords && (
-          <Marker coordinate={currentCoords} title={device.name} />
+        {markerCoords && (
+          <Marker coordinate={markerCoords} title={device.name} />
         )}
       </MapView>
     </View>
